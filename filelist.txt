@@ -1,0 +1,14 @@
+
+The following is a list of files in the 
+giantint release.
+
+readme			     
+numberth/	
+	factor.c	 
+	fermat.c	 
+	fgiants.c	  
+	giants.c	 
+	giants.h	  
+	lucdwt.c	 
+	readme		  
+	tutor.c		  

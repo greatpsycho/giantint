@@ -1,0 +1,277 @@
+giantint/numberth
+NUMBER THEORY
+
+Updates: 
+  12 Jun 97 RDW (creation)
+
+c. 1997 Perfectly Scientific, Inc.
+All Rights Reserved.
+
+____________________________________________
+
+CONTENTS
+
+factor.c: General factoring program.
+
+fermat.c: Fermat number factoring program.
+
+ellmul.c: Fermat-elliptic arthmetic library.
+
+ellmul0.c: Separate source for Windows compilation, to get around
+  Visual C++ compiler bug. 
+
+giants.[ch]: General-purpose, large-number 
+  library.
+
+lucdwt.c: Lucas-Lehmer prime search program.
+
+tutor.c: Tutoring program to explain use 
+  of giants.
+
+____________________________________________
+
+ABOUT factor.c
+
+The program "factor.c" is a general-purpose 
+factoring engine.
+
+COMPILING
+
+On typical Unix systems:
+
+% cc -O factor.c giants.c -lm -o factor
+
+or:
+
+% gcc -O factor.c giants.c -lm -o factor
+
+On Win32 (Microsoft Visual C++):
+
+% cl -O2 factor.c giants.c
+
+USAGE
+
+Simplest usage is:
+
+% factor
+
+and type in a number of choice followed 
+by <Return>, as in:
+
+% factor
+11111111111111111
+
+and the program will run through various 
+factoring algorithms.
+
+For especially fast arithmetic when the 
+number to be factored is of the form 
+2^q +- 1 (Fermat, Mersenne numbers respec-
+tively), one can do:
+
+% factor <+-1> <q>
+
+For example, to factor M_137 = 2^137-1, one 
+can do:
+
+% factor -1 137
+
+and watch.  The program will end up in its 
+highest gear, using elliptic curves in 
+attempts to find factors of M_137.
+
+ALGORITHMS 
+
+The 'factor' program first sieves over all 
+possible prime divisors < 2^16.  Then the 
+'Pollard rho' method is tried for a time; 
+then the 'Pollard (p-1)' method.  Finally, 
+the elliptic curve method (ECM) is tried 
+with increasing curve limits.  To restart 
+(ECM only) with new random curves - so as 
+not simply to redo old curves - the "-r" 
+option can be used, as in:
+
+% factor -r
+<Enter number again>
+
+or, for Fermat/Mersenne numbers 2^q +- 1 
+respectively,
+
+% factor +-1 q -r
+
+NOTES
+
+Rigorous primality checking is not 
+performed. When a large factor such as 
+48735... in:
+
+2 * 2 * 73 * 439 * 48735197227340677615193
+
+is reported, the program has found said 
+factor to be a base-2 pseudoprime.  So 
+primality of large factors is likely, but 
+not proven.
+
+____________________________________________ 
+
+ABOUT fermat.c
+
+The program "fermat.c" finds factors of 
+Fermat numbers F_n, where F_n := 2^(2^n)+1.  
+The algorithms used are effective for n = 7
+through 22.  The support code "ellmul.c" 
+handles floating-point DWT-based arithmetic, 
+suitable for operations modulo gigantic
+Fermat numbers.  Note that this program is 
+designed for very long runs - like days or 
+weeks per elliptic curve on a typical 
+workstation of today.
+
+COMPILING
+
+The compile instructions are listed conveniently
+atop the fermat.c source.
+
+USAGE
+
+To factor a Fermat number F_n = 2^(2^n)+1, 
+do:
+
+% fermat n
+
+to attempt to factor F_n.  There will be an 
+output like so:
+
+% factor 15
+Attacking 2^32768 + 1
+Selecting elliptic curve seed s = 891933894:
+.............
+Creating second stage table.................
+....................................
+Commencing second stage.....................
+............................................
+............................................
+............................................
+............................................
+................
+
+After the second stage finishes (this could 
+take hours or days!) a factor is reported 
+(if found) and a new elliptic curve 
+commences.
+
+NOTES
+
+More details on the number theory can be 
+found in the comment atop the "fermat.c" 
+source.
+
+____________________________________________
+
+ABOUT lucdwt.c
+
+The program "lucdwt.c" is a search engine 
+for large Mersenne primes p := 2^q-1.  The 
+program effects the celebrated Lucas-Lehmer 
+test for primality.
+
+COMPILING
+
+On typical Unix systems:
+
+% cc -O lucdwt.c -lm -o lucdwt
+
+On Win32 (Microsoft Visual C++):
+
+% cl -O2 lucdwt.c
+
+USAGE
+
+The straightforward Lucas-Lehmer test usage 
+is:
+
+% lucdwt q n
+
+where the candidate p = 2^q-1 is under test, 
+and n is the (power of two) DWT run length.  
+For example, to test p = 2^521-1 for 
+primality, one can do:
+
+% lucdwt 521 64
+521 0
+
+with this last printout of 0 meaning the 
+final Lucas-Lehmer residue is 0, meaning 
+2^521-1 is proven prime. Generally n must be 
+such that q/n is approximately 6 to 10 bits.
+We say approximately because the only 
+important criterion is that floating point 
+convolution errors with respect to true 
+integer convolution) must be controlled.  
+To test a given scenario for convolution 
+integrity, one can do such as:
+
+% lucdwt 216091 16384 100 1
+
+which means "start testing 2^216091-1 for 
+primality, using DWT run length of 
+n = 16384 = 2^14, and report the first 100
+Lucas-Lehmer passes, including the relevant 
+convolution error (the maximum absolute 
+elemental error per convolution). On an m68k 
+system, for example, the above test shows a
+"maxerr" of only 0.000004 on the 30-th 
+Lucas-Lehmer pass. One can then find that 
+n = 8192 is just too short (the "maxerr"
+exceeds 0.1) so the possible prime 
+2^216091-1 may proceed with n = 16384.  
+(Incidentally, 2^216091-1 was for a 
+considerable time the largest known prime 
+number.)
+
+NOTES
+
+The largest known prime as of this writing 
+(April 1997) is the Armengaud-Woltman prime, 
+actually found using the algorithm in this 
+PSI release.  Woltman had in fact cast the
+lucDWT.c code into assembler.  Other 
+investigators have offered other 
+enhancements. (see George Woltman's web site
+http://www.mersenne.org/prime.htm).
+
+____________________________________________
+
+ABOUT tutor.c
+
+The program "tutor.c" is a brief tutorial 
+showing at source level how one may use 
+giants.
+
+COMPILING
+
+On typical Unix systems:
+
+% cc -O tutor.c giants.c -lm -o tutor
+
+On Win32 (Microsoft Visual C++):
+
+% cl -O2 tutor.c giants.c
+
+USAGE
+
+The usage is:
+
+% tutor
+
+whence you are prompted for input of giant 
+integers x, y.  Then some operations are 
+performed, with results printed.  Finally 
+the program asks for the input of a possible 
+prime.  After you enter such, a 
+pseudoprimality test is performed.
+
+____________________________________________
+
+END
